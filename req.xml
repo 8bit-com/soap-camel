@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SendRequestRequest xmlns="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/1.2" xmlns:ns2="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/basic/1.2" xmlns:ns3="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/faults/1.2">
+    <SenderProvidedRequestData>
+        <MessageID>597665e5-0f6c-11ee-bfe3-b9b4fc4628fc</MessageID>
+        <ns2:MessagePrimaryContent>
+            <rt:Request xmlns:rt="urn://rostrud/uchet/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <rt:IdOrder>4564654645</rt:IdOrder>
+                <rt:DateOrder>2021-02-18</rt:DateOrder>
+                <rt:FIO>
+                    <rt:LastName>Иванов</rt:LastName>
+                    <rt:FirstName>Петр</rt:FirstName>
+                    <rt:SecondName>Сергеевич</rt:SecondName>
+                </rt:FIO>
+                <rt:SNILS>82095352437</rt:SNILS>
+                <rt:Birthday>1984-12-05</rt:Birthday>
+                <rt:Gender>male</rt:Gender>
+                <rt:Period>
+                    <rt:DateStart>2021-01-01</rt:DateStart>
+                    <rt:DateEnd>2021-01-31</rt:DateEnd>
+                </rt:Period>
+            </rt:Request>
+        </ns2:MessagePrimaryContent>
+    </SenderProvidedRequestData>
+</SendRequestRequest>

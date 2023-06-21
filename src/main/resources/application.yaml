@@ -1,0 +1,7 @@
+server:
+  port: 9999
+
+tarantool.host: tarantool-api.dev.ecp #localhost
+tarantool.port: 3301
+tarantool.username: admin
+tarantool.password: tarantool-api-cluster-cookie

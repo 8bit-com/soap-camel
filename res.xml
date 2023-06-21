@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SendRequestResponse xmlns="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/1.2" xmlns:ns2="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/basic/1.2" xmlns:ns3="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/faults/1.2">
+    <MessageMetadata Id="SIGNED_BY_SMEV">
+        <MessageId>597665e5-0f6c-11ee-bfe3-b9b4fc4628fc</MessageId>
+        <MessageType>REQUEST</MessageType>
+        <Sender>
+            <Mnemonic>PFR18</Mnemonic>
+        </Sender>
+        <SendingTimestamp>2023-06-20T16:14:12.935+03:00</SendingTimestamp>
+        <Recipient>
+            <Mnemonic>RTRD06</Mnemonic>
+        </Recipient>
+        <Status>requestIsQueued</Status>
+    </MessageMetadata>
+    <SMEVSignature>
+        <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/basic/1.2" xmlns:ns2="urn://x-artefacts-smev-gov-ru/services/message-exchange/types/1.2">
+            <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                <ds:SignatureMethod Algorithm="urn:ietf:params:xml:ns:cpxmlsec:algorithms:gostr34102012-gostr34112012-256"/>
+                <ds:Reference URI="#SIGNED_BY_SMEV">
+                    <ds:Transforms>
+                        <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                        <ds:Transform Algorithm="urn://smev-gov-ru/xmldsig/transform"/>
+                    </ds:Transforms>
+                    <ds:DigestMethod Algorithm="urn:ietf:params:xml:ns:cpxmlsec:algorithms:gostr34112012-256"/>
+                    <ds:DigestValue>73VOlcaU767tVqDemBSr1zrMHzzSEcwdJenOkWpruz4=</ds:DigestValue>
+                </ds:Reference>
+            </ds:SignedInfo>
+            <ds:SignatureValue>hhtEDxwPLwqFQVO/3zwJlt3EwQyWEgSIOrpi5IGDojlZexV6Hu9XRDGBb+AgnrTNP9t1lkKO2Np8pgh+RR9iPA==</ds:SignatureValue>
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>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</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </ds:Signature>
+    </SMEVSignature>
+</SendRequestResponse>
