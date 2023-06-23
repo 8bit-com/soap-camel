@@ -51,6 +51,10 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.camel.springboot</groupId>
             <artifactId>camel-cxf-soap-starter</artifactId>
         </dependency>
@@ -77,14 +81,12 @@
             <artifactId>synapse-core</artifactId>
             <version>3.0.2</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <version>3.1.0</version>
-            <scope>test</scope>
-        </dependency>
 
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-dbcp</artifactId>
@@ -113,7 +115,7 @@
         <dependency>
             <groupId>ru.gov.pfr.ecp.iis.smev.adapter</groupId>
             <artifactId>ecp-smev-adapter-core</artifactId>
-            <version>0.1.12</version>
+            <version>0.1.24-test</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
@@ -122,6 +124,8 @@
             <version>1.18.28</version>
             <scope>provided</scope>
         </dependency>
+
+
 
     </dependencies>
 

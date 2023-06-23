@@ -1,14 +1,22 @@
 package com.example.soapcamel;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.soap.util.SoapMessageUtil;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.types._1.SendRequestRequest;
 
-import javax.xml.bind.UnmarshalException;
-import java.util.Objects;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
 
 @Component
 public class SoapGateSendRequestRoute extends RouteBuilder {
@@ -29,11 +37,25 @@ public class SoapGateSendRequestRoute extends RouteBuilder {
         from("direct:start")
                 .routeId("etalon")
                 .bean(Test.class, "request")
+                .removeHeaders("*")
                 .setHeader(CxfConstants.OPERATION_NAME, constant("SendRequest"))
+                .setHeader("Accept", constant("application/soap+xml"))
+                .setHeader("Host", constant("172.18.32.61:80"))
                 .setHeader("Content-Type", constant("application/soap+xml"))
-                .to("cxf://" + "http://172.18.32.61:80/g2g/smev_proxy" +
-                        "?serviceClass=ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.SMEVMessageExchangePortType" +
-                        "&loggingFeatureEnabled=true")
+                .process(exchange -> {
+                    SendRequestRequest sendRequestRequest = (SendRequestRequest) exchange.getIn().getBody();
+                    JAXBContext context = JAXBContext.newInstance(SendRequestRequest.class);
+                    Marshaller marshaller= context.createMarshaller();
+//                    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+//                    marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+//                    marshaller.setProperty("com.sun.xml.bind.xmlHeaders", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+                    marshaller.marshal(sendRequestRequest, new File("./req.xml"));
+                })
+                .to("cxf:bean:ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.SMEVMessageExchangePortType")
+                .process(exchange -> {
+                    String soapEnvelop = SoapMessageUtil.extractSoapEnvelopHeader(exchange.getIn().getHeaders());
+                    System.out.println(soapEnvelop);
+                })
                 .bean(Test.class, "response")
                 .bean(SendTarantoolService.class, "saveSMEVMessage");
     }

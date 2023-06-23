@@ -11,6 +11,7 @@ import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.types._1.SendReq
 import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.types._1.SendRequestResponse;
 import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.types._1.SenderProvidedRequestData;
 import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.types.basic._1.MessagePrimaryContent;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.types.basic._1.Void;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -38,6 +39,7 @@ public class Test {
         SenderProvidedRequestData senderProvidedRequestData = new SenderProvidedRequestData();
 
         senderProvidedRequestData.setMessageID(uuid.toString());
+        senderProvidedRequestData.setTestMessage(new Void());
 
         Request request = Request.builder()
                 .idOrder("4564654645")
@@ -53,6 +55,7 @@ public class Test {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document document = db.newDocument();
+        document.setXmlStandalone(false);
         Marshaller marshaller = jc.createMarshaller();
         marshaller.marshal(request, document);
 
@@ -64,10 +67,7 @@ public class Test {
 
         sendRequestRequest.setSenderProvidedRequestData(senderProvidedRequestData);
 
-        JAXBContext context = JAXBContext.newInstance(SendRequestRequest.class);
-        Marshaller mar= context.createMarshaller();
-        mar.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        mar.marshal(sendRequestRequest, new File("./req.xml"));
+
 
         return sendRequestRequest;
     };
@@ -84,9 +84,11 @@ public class Test {
         System.out.println(sendRequestResponse.getSMEVSignature().getAny());
 
         JAXBContext context = JAXBContext.newInstance(SendRequestResponse.class);
-        Marshaller mar= context.createMarshaller();
-        mar.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        mar.marshal(sendRequestResponse, new File("./res.xml"));
+        Marshaller marshaller = context.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+        marshaller.setProperty("com.sun.xml.bind.xmlHeaders", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        marshaller.marshal(sendRequestResponse, new File("./res.xml"));
 
         return SmevMessageRecived.builder()
                 .messageId(sendRequestResponse.getMessageMetadata().getMessageId())

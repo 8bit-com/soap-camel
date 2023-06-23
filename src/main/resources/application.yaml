@@ -5,3 +5,24 @@ tarantool.host: tarantool-api.dev.ecp #localhost
 tarantool.port: 3301
 tarantool.username: admin
 tarantool.password: tarantool-api-cluster-cookie
+
+
+service.soapgate.enabled: true
+
+spring:
+  datasource:
+    url: jdbc:postgresql://172.18.32.107:6432/dev_ecp_smev_adapter?prepareThreshold=0
+    username: dev_ecp_smev_adapter_wrk
+    password: Pass123
+  jpa:
+    database: POSTGRESQL
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: ecp_smev_adapter
+        jdbc:
+          batch_size: 100
+        order_inserts: true
+    hibernate:
+      use-new-id-generator-mappings: true
+
