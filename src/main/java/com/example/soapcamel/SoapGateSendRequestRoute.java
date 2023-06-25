@@ -42,20 +42,11 @@ public class SoapGateSendRequestRoute extends RouteBuilder {
                 .setHeader("Accept", constant("application/soap+xml"))
                 .setHeader("Host", constant("172.18.32.61:80"))
                 .setHeader("Content-Type", constant("application/soap+xml"))
-                .process(exchange -> {
-                    SendRequestRequest sendRequestRequest = (SendRequestRequest) exchange.getIn().getBody();
-                    JAXBContext context = JAXBContext.newInstance(SendRequestRequest.class);
-                    Marshaller marshaller= context.createMarshaller();
-//                    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-//                    marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-//                    marshaller.setProperty("com.sun.xml.bind.xmlHeaders", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-                    marshaller.marshal(sendRequestRequest, new File("./req.xml"));
-                })
                 .to("cxf:bean:ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.SMEVMessageExchangePortType")
-                .process(exchange -> {
-                    String soapEnvelop = SoapMessageUtil.extractSoapEnvelopHeader(exchange.getIn().getHeaders());
-                    System.out.println(soapEnvelop);
-                })
+                //.bean(Test.class, "test")
+                //.bean(Test.class, "envelop")
+                //.to("direct:" + EnvelopStoreRoute.ROUTE_ID)
+
                 .bean(Test.class, "response")
                 .bean(SendTarantoolService.class, "saveSMEVMessage");
     }

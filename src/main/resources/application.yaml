@@ -9,6 +9,10 @@ tarantool.password: tarantool-api-cluster-cookie
 
 service.soapgate.enabled: true
 
+service.ea.enabled: true
+service.ea.base-url: http://172.18.32.31:28080/api/sk/api
+service:.ea.base-dir: src/java/
+
 spring:
   datasource:
     url: jdbc:postgresql://172.18.32.107:6432/dev_ecp_smev_adapter?prepareThreshold=0

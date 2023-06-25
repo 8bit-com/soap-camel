@@ -1,12 +1,18 @@
 package com.example.soapcamel;
 
 import com.bft.springtarantoolapi.model.SmevMessageRecived;
-import com.fasterxml.uuid.Generators;
+import com.github.f4b6a3.uuid.UuidCreator;
 import org.apache.camel.Body;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.common.types.SmevMethod;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.ea.dto.response.SingleDocumentOperationResponse;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.ea.dto.response.StoreResponse;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.ea.model.DaAttachment;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.ea.model.DaDocument;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.ea.model.SaveAttachmentInfo;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.ea.service.EAService;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model.SoapGateMessage;
 import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.types._1.SendRequestRequest;
 import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.types._1.SendRequestResponse;
 import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.types._1.SenderProvidedRequestData;
@@ -19,26 +25,37 @@ import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.print.Book;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class Test {
 
+    public static final String ENVELOP_XML_GUID_PROPERTY = "ENVELOP_XML_GUID";
+    public static final String ROUTE_ID = "envelop-store";
+
+    private String fileName;
+
+
+    private final EAService eaService;
+
+    public Test(EAService eaService) {
+        this.eaService = eaService;
+    }
+
     public SendRequestRequest request() throws JAXBException, ParserConfigurationException {
-
-        UUID uuid = Generators.timeBasedGenerator().generate();
-
-        System.out.println(uuid.toString());
 
         SendRequestRequest sendRequestRequest = new SendRequestRequest();
 
         SenderProvidedRequestData senderProvidedRequestData = new SenderProvidedRequestData();
 
-        senderProvidedRequestData.setMessageID(uuid.toString());
+        String uuid = UuidCreator.getTimeBased().toString();
+
+        System.out.println(uuid);
+
+        senderProvidedRequestData.setMessageID(uuid);
         senderProvidedRequestData.setTestMessage(new Void());
 
         Request request = Request.builder()
@@ -66,8 +83,6 @@ public class Test {
         senderProvidedRequestData.setMessagePrimaryContent(messagePrimaryContent);
 
         sendRequestRequest.setSenderProvidedRequestData(senderProvidedRequestData);
-
-
 
         return sendRequestRequest;
     };
@@ -100,5 +115,38 @@ public class Test {
                 .smevMessageType(0)
                 .build();
     };
+
+    public void test(@Body SendRequestResponse sendRequestResponse){
+        System.out.println("test");
+    }
+
+    public void envelop(@Body SoapGateMessage soapGateMessage){
+
+        SoapGateMessage body = soapGateMessage;
+        SmevMethod method = body.getMethod();
+        if(method.equals(SmevMethod.SEND_REQUEST_REQUEST)){
+            fileName = "SEND_REQUEST_REQUEST_" + body.getMessageId() + ".xml";
+        } else if(method.equals(SmevMethod.SEND_REQUEST_RESPONSE)){
+            fileName = "SEND_REQUEST_RESPONSE_" + body.getMessageId() + ".xml";
+        }
+        System.out.println(fileName);
+//        StoreResponse file = eaService.storeEnvelop(
+//                body.getMessageId(),
+//                exchange.getProperty(SmevRequestHandler.ORIGINAL_CONTENT_PROPERTY, String.class).getBytes(StandardCharsets.UTF_8), fileName);
+//
+//        List<SaveAttachmentInfo> attachments = List.of(
+//                SaveAttachmentInfo.builder().fileGuid(file.getFileGuid()).build()
+//        );
+//
+//        SingleDocumentOperationResponse response = eaService.saveDocument(body, attachments);
+//        DaAttachment envelop = Optional.ofNullable(response.getDocument())
+//                .map(DaDocument::getAttachments)
+//                .filter(l -> !l.isEmpty())
+//                .map(l -> l.get(0))
+//                .orElseThrow(() -> new ArrayStoreException("There is no saved files in response"));
+//
+//        exchange.setProperty(ENVELOP_XML_GUID_PROPERTY, envelop.getFileGuid());
+//        System.out.println("Xml Envelop Body for messageId = " + body.getMessageId() + " has been successfully stored. Envelop GUID: " + envelop.getFileGuid());
+    }
 
 }
