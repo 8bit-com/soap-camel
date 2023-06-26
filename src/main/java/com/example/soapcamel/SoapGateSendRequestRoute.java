@@ -1,25 +1,19 @@
 package com.example.soapcamel;
 
+import lombok.RequiredArgsConstructor;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.cxf.common.message.CxfConstants;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.stereotype.Component;
-import ru.gov.pfr.ecp.iis.smev.adapter.core.soap.util.SoapMessageUtil;
-import ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.types._1.SendRequestRequest;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import java.io.File;
-import java.io.StringReader;
-import java.io.StringWriter;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.common.entity.ReceiverConfigurationEntity;
+import javax.xml.bind.JAXBException;
 
 @Component
+@RequiredArgsConstructor
 public class SoapGateSendRequestRoute extends RouteBuilder {
+
+    private final SmevRequestHandlerSupplier handlerSupplier;
 
     @Override
     public void configure() throws Exception {
@@ -43,12 +37,12 @@ public class SoapGateSendRequestRoute extends RouteBuilder {
                 .setHeader("Host", constant("172.18.32.61:80"))
                 .setHeader("Content-Type", constant("application/soap+xml"))
                 .to("cxf:bean:ru.gov.pfr.ecp.iis.smev.adapter.core.soapgate.model._1_2.SMEVMessageExchangePortType")
-                //.bean(Test.class, "test")
-                //.bean(Test.class, "envelop")
-                //.to("direct:" + EnvelopStoreRoute.ROUTE_ID)
+                .bean(Test.class, "storeEnvelop");
 
-                .bean(Test.class, "response")
-                .bean(SendTarantoolService.class, "saveSMEVMessage");
+
+                //.bean(Test.class, "response")
+                //.bean(SendTarantoolService.class, "saveSMEVMessage");
     }
+
 
 }

@@ -2,9 +2,14 @@ package com.example.soapcamel;
 
 import com.bft.springtarantoolapi.model.SmevMessageRecived;
 import com.github.f4b6a3.uuid.UuidCreator;
+import lombok.RequiredArgsConstructor;
 import org.apache.camel.Body;
+import org.apache.camel.Exchange;
+import org.apache.cxf.binding.soap.SoapMessage;
+import org.apache.cxf.helpers.IOUtils;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
+import ru.gov.pfr.ecp.iis.smev.adapter.core.common.entity.ReceiverConfigurationEntity;
 import ru.gov.pfr.ecp.iis.smev.adapter.core.common.types.SmevMethod;
 import ru.gov.pfr.ecp.iis.smev.adapter.core.ea.dto.response.SingleDocumentOperationResponse;
 import ru.gov.pfr.ecp.iis.smev.adapter.core.ea.dto.response.StoreResponse;
@@ -25,25 +30,25 @@ import javax.xml.bind.Marshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class Test {
-
-    public static final String ENVELOP_XML_GUID_PROPERTY = "ENVELOP_XML_GUID";
-    public static final String ROUTE_ID = "envelop-store";
-
-    private String fileName;
-
 
     private final EAService eaService;
 
-    public Test(EAService eaService) {
-        this.eaService = eaService;
-    }
+    private String uuid;
+
 
     public SendRequestRequest request() throws JAXBException, ParserConfigurationException {
 
@@ -51,7 +56,7 @@ public class Test {
 
         SenderProvidedRequestData senderProvidedRequestData = new SenderProvidedRequestData();
 
-        String uuid = UuidCreator.getTimeBased().toString();
+        uuid = UuidCreator.getTimeBased().toString();
 
         System.out.println(uuid);
 
@@ -87,7 +92,7 @@ public class Test {
         return sendRequestRequest;
     };
 
-    public SmevMessageRecived response(@Body SendRequestResponse sendRequestResponse) throws JAXBException {
+    public SmevMessageRecived response(@Body SendRequestResponse sendRequestResponse) throws JAXBException, IOException {
 
         System.out.println(sendRequestResponse.getMessageMetadata().getMessageId());
         System.out.println(sendRequestResponse.getMessageMetadata().getSendingTimestamp());
@@ -116,37 +121,29 @@ public class Test {
                 .build();
     };
 
-    public void test(@Body SendRequestResponse sendRequestResponse){
-        System.out.println("test");
+    public void storeEnvelop(Exchange exchange) throws JAXBException, IOException{
+        String contents =  extractSoapEnvelopHeader(exchange);
+
+        new File("src/main/resources/"+uuid).mkdirs();
+
+        Path path = Paths.get("src/main/resources/"+uuid+"/output.txt");
+
+        Files.writeString(path, contents, StandardCharsets.UTF_8);
+
+        File output = new File("src/main/resources/"+uuid+"/output.txt");
+
+        eaService.storeEnvelop(uuid, contents.getBytes(StandardCharsets.UTF_8), "SEND_REQUEST_RESPONSE_" + uuid + ".xml");
     }
 
-    public void envelop(@Body SoapGateMessage soapGateMessage){
+    public String extractSoapEnvelopHeader(Exchange exchange) throws IOException {
+        Map<String, Object> headers = exchange.getIn().getHeaders();
+        SoapMessage soapMessage = (SoapMessage) headers.get("CamelCxfMessage");
 
-        SoapGateMessage body = soapGateMessage;
-        SmevMethod method = body.getMethod();
-        if(method.equals(SmevMethod.SEND_REQUEST_REQUEST)){
-            fileName = "SEND_REQUEST_REQUEST_" + body.getMessageId() + ".xml";
-        } else if(method.equals(SmevMethod.SEND_REQUEST_RESPONSE)){
-            fileName = "SEND_REQUEST_RESPONSE_" + body.getMessageId() + ".xml";
+        try (InputStream in = (ByteArrayInputStream) soapMessage.get("SoapEnvelop")) {
+            byte[] payload = IOUtils.readBytesFromStream(in);
+
+            return new String(payload, StandardCharsets.UTF_8);
         }
-        System.out.println(fileName);
-//        StoreResponse file = eaService.storeEnvelop(
-//                body.getMessageId(),
-//                exchange.getProperty(SmevRequestHandler.ORIGINAL_CONTENT_PROPERTY, String.class).getBytes(StandardCharsets.UTF_8), fileName);
-//
-//        List<SaveAttachmentInfo> attachments = List.of(
-//                SaveAttachmentInfo.builder().fileGuid(file.getFileGuid()).build()
-//        );
-//
-//        SingleDocumentOperationResponse response = eaService.saveDocument(body, attachments);
-//        DaAttachment envelop = Optional.ofNullable(response.getDocument())
-//                .map(DaDocument::getAttachments)
-//                .filter(l -> !l.isEmpty())
-//                .map(l -> l.get(0))
-//                .orElseThrow(() -> new ArrayStoreException("There is no saved files in response"));
-//
-//        exchange.setProperty(ENVELOP_XML_GUID_PROPERTY, envelop.getFileGuid());
-//        System.out.println("Xml Envelop Body for messageId = " + body.getMessageId() + " has been successfully stored. Envelop GUID: " + envelop.getFileGuid());
     }
 
 }
